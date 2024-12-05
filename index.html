@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Royal Style Carousel Cards</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+
+.logo-text-container {
+    position: fixed;
+    top: 20px;
+    width: 100%;
+    text-align: center;
+    z-index: 5;
+}
+
+.logo-text {
+    color: #ffffff;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 0 8px; /* Tăng padding 2 bên để cân đối */
+    line-height: 1.2;
+    display: inline-block;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    background: transparent;
+    border: 4px solid #ffffff;
+    border-radius: 5px;
+    z-index: 5;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Thêm đổ bóng cho khung */
+}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                #E7F5DC,
+                #CFE1B9,
+                #B6C99B,
+                #F4E7F8,
+                #F2DDDC,
+                #F6BCBA
+            ) fixed;
+        }
+
+        body {
+            height: 100%;
+            overflow-x: hidden;
+            position: fixed;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+            overscroll-behavior: none;
+        }
+
+
+
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .card {
+            width: 350px;
+            height: 550px;
+            background: #ffffff;
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            place-content: center;
+            place-items: center;
+            overflow: hidden;
+            border-radius: 20px;
+            transition: all 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+            transform-origin: center center;
+            opacity: 0;
+            pointer-events: none;
+            will-change: transform;
+            backface-visibility: hidden;
+            cursor: pointer;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 200%;
+            background-image: linear-gradient(180deg, 
+        rgb(200, 203, 196),
+        rgb(200, 203, 196)
+            );
+            animation: rotBGimg 2s linear infinite;
+            transition: all 0.2s linear;
+            z-index: 1;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            background: #E7F5DC;
+            inset: 5px;
+            border-radius: 15px;
+            z-index: 2;
+        }
+
+        @keyframes rotBGimg {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+.card img {
+    width: calc(100% - 10px);
+    height: 78%;
+    object-fit: cover;
+    border-radius: 12px;
+    z-index: 3;
+    margin-top: 2px;
+    transform: none !important;
+    transition: none !important;
+    pointer-events: none;
+}
+
+
+
+        .card-content {
+            z-index: 3;
+            padding: 20px;
+            color: white;
+            width: 100%;
+            text-align: center;
+        }
+
+        .card-title {
+            color: #000;
+            margin-bottom: 8px;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .card-text {
+            color: rgba(0, 0, 0, 0.8);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+.card:hover::before {
+    background-image: linear-gradient(180deg, 
+        (239, 70, 111),
+        rgb(254, 208, 102)
+    );
+    animation: rotBGimg 2s linear infinite;
+}
+
+        .card.active {
+            transform: translateX(0) scale(1);
+            opacity: 1;
+            z-index: 2;
+            pointer-events: auto;
+        }
+
+        .card.prev {
+            transform: translateX(-120%) scale(0.85);
+            opacity: 0.7;
+            z-index: 1;
+            pointer-events: auto;
+        }
+
+        .card.next {
+            transform: translateX(120%) scale(0.85);
+            opacity: 0.7;
+            z-index: 1;
+            pointer-events: auto;
+        }
+
+        .carousel-indicators {
+            position: fixed;
+            bottom: 30px;
+            display: none;
+            gap: 8px;
+            z-index: 4;
+        }
+
+        .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator.active {
+            width: 24px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        @media (max-width: 768px) {
+            .card {
+                width: 320px;
+                height: 520px;
+            }
+
+            .card::before {
+                width: 120px;
+            }
+
+            .card.prev {
+                transform: translateX(-100%) scale(0.85);
+            }
+
+            .card.next {
+                transform: translateX(100%) scale(0.85);
+            }
+
+            .carousel-indicators {
+                bottom: 20px;
+            }
+        }
+
+
+.discover-btn {
+    position: absolute;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 24px;
+    background-color: rgba(255, 255, 255, 0.1); /* Giảm xuống 0.1 để trong suốt hơn */
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(2px); /* Giảm xuống 2px để ít mờ hơn */
+    z-index: 4;
+    text-decoration: none;
+}
+
+.discover-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2); /* Điều chỉnh độ trong suốt khi hover */
+    transform: translateX(-50%) scale(1.05);
+}
+    </style>
+</head>
+<body>
+
+<div class="logo-text-container">
+    <h1 class="logo-text">MECWISH</h1>
+</div>
+
+    <div class="carousel-container" id="carouselContainer">
+        <!-- Card 1 -->
+<div class="card">
+    <img src="https://res.cloudinary.com/da5caoq3v/image/upload/v1733412303/IMG_0046_jqbxpy.jpg" alt="Card 1">
+    <div class="card-content">
+        <h3 class="card-title">Rolls-Royce</h3>
+        <p class="card-text">Inspiring Greatness</p>
+        <a href="https://car.mecwish.com" class="discover-btn">Discover</a>
+    </div>
+</div>
+
+<!-- Card 2 -->
+<div class="card">
+    <img src="https://res.cloudinary.com/da5caoq3v/image/upload/v1733413054/IMG_0054_gz10ru.jpg" alt="Card 2">
+    <div class="card-content">
+        <h3 class="card-title">Maybach</h3>
+        <p class="card-text">Excellence in Luxury</p>
+        <a href="https://car.mecwish.com" class="discover-btn">Discover</a>
+    </div>
+</div>
+
+<!-- Card 3 -->
+<div class="card">
+    <img src="https://res.cloudinary.com/da5caoq3v/image/upload/v1733413061/IMG_0056_cfloe4.jpg" alt="Card 3">
+    <div class="card-content">
+        <h3 class="card-title">BMW</h3>
+        <p class="card-text">The Ultimate Driving Machine</p>
+        <a href="https://car.mecwish.com" class="discover-btn">Discover</a>
+    </div>
+</div>
+
+<!-- Card 4 -->
+<div class="card">
+    <img src="https://res.cloudinary.com/da5caoq3v/image/upload/v1733413058/IMG_0055_kvk2ms.jpg" alt="Card 4">
+    <div class="card-content">
+        <h3 class="card-title">Cadillac</h3>
+        <p class="card-text">Standard of the World</p>
+        <a href="https://car.mecwish.com" class="discover-btn">Discover</a>
+    </div>
+</div>
+
+<!-- Card 5 -->
+<div class="card">
+    <img src="https://res.cloudinary.com/da5caoq3v/image/upload/v1733413061/IMG_0057_b5uptx.jpg" alt="Card 5">
+    <div class="card-content">
+        <h3 class="card-title">Bentley</h3>
+        <p class="card-text">Be Extraordinary</p>
+        <a href="https://car.mecwish.com" class="discover-btn">Discover</a>
+    </div>
+</div>
+    </div>
+
+    <div class="carousel-indicators" id="carouselIndicators"></div>
+
+
+
+    <footer style="position: fixed; bottom: 0; width: 100%; padding: 10px; text-align: center; background-color: transparent; z-index: 5; pointer-events: none;">
+        <p style="color: #000; font-size: 0.9rem;">© 2024 MECWISH. All rights reserved.</p>
+    </footer>
+
+<!-- Chỉ cần điều chỉnh phần JavaScript, phần HTML và CSS giữ nguyên -->
+<script>
+    const cards = Array.from(document.querySelectorAll('.card'));
+    const container = document.getElementById('carouselContainer');
+    const indicators = document.getElementById('carouselIndicators');
+    let currentIndex = 0;
+    let startX = 0;
+    let startY = 0;
+    let isDragging = false;
+    let isScrolling = false;
+    let clickStartTime = 0;
+    let clickStartPosition = { x: 0, y: 0 };
+
+    // Create indicators
+    cards.forEach((_, index) => {
+        const indicator = document.createElement('div');
+        indicator.className = 'indicator';
+        indicator.addEventListener('click', () => goToCard(index));
+        indicators.appendChild(indicator);
+    });
+
+    const indicatorDots = Array.from(document.querySelectorAll('.indicator'));
+
+    function updateCards() {
+        cards.forEach((card, index) => {
+            card.classList.remove('active', 'prev', 'next');
+            indicatorDots[index].classList.remove('active');
+            
+            if (index === currentIndex) {
+                card.classList.add('active');
+                indicatorDots[index].classList.add('active');
+            } else if (index === getPrevIndex()) {
+                card.classList.add('prev');
+            } else if (index === getNextIndex()) {
+                card.classList.add('next');
+            }
+        });
+    }
+
+    function getPrevIndex() {
+        return (currentIndex - 1 + cards.length) % cards.length;
+    }
+
+    function getNextIndex() {
+        return (currentIndex + 1) % cards.length;
+    }
+
+    function nextCard() {
+        currentIndex = getNextIndex();
+        updateCards();
+    }
+
+    function prevCard() {
+        currentIndex = getPrevIndex();
+        updateCards();
+    }
+
+    function goToCard(index) {
+        if (index === currentIndex) return;
+        currentIndex = index;
+        updateCards();
+    }
+
+    // Kiểm tra xem click có phải là trên discover button không
+    function isClickOnDiscoverButton(event) {
+        const target = event.target;
+        return target.classList.contains('discover-btn') || 
+               target.closest('.discover-btn');
+    }
+
+    // Touch events
+    container.addEventListener('touchstart', (e) => {
+        if (isClickOnDiscoverButton(e)) {
+            return; // Cho phép click event trên discover button
+        }
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        clickStartTime = Date.now();
+        clickStartPosition = { x: startX, y: startY };
+        isScrolling = false;
+        e.preventDefault();
+    }, { passive: false });
+
+    container.addEventListener('touchmove', (e) => {
+        if (isClickOnDiscoverButton(e)) return;
+        if (!startX || isScrolling) return;
+
+        const diffX = e.touches[0].clientX - startX;
+        const diffY = e.touches[0].clientY - startY;
+
+        if (!isScrolling) {
+            isScrolling = Math.abs(diffY) > Math.abs(diffX);
+            if (!isScrolling) {
+                e.preventDefault();
+            }
+        }
+    }, { passive: false });
+
+    container.addEventListener('touchend', (e) => {
+        if (isClickOnDiscoverButton(e)) return;
+        if (isScrolling) return;
+
+        const diffX = e.changedTouches[0].clientX - startX;
+        const timeDiff = Date.now() - clickStartTime;
+        const finalPosition = {
+            x: e.changedTouches[0].clientX,
+            y: e.changedTouches[0].clientY
+        };
+        
+        // Kiểm tra xem có phải là click ngắn không
+        const isShortClick = timeDiff < 300;
+        const moveDistance = Math.sqrt(
+            Math.pow(finalPosition.x - clickStartPosition.x, 2) +
+            Math.pow(finalPosition.y - clickStartPosition.y, 2)
+        );
+        const isSmallMovement = moveDistance < 10;
+
+        if (isShortClick && isSmallMovement) {
+            // Đây là click - không ngăn chặn
+            return;
+        }
+
+        // Xử lý swipe
+        if (Math.abs(diffX) > 50) {
+            if (diffX > 0) {
+                prevCard();
+            } else {
+                nextCard();
+            }
+        }
+        startX = 0;
+        startY = 0;
+        e.preventDefault();
+    }, { passive: false });
+
+    // Mouse events
+    container.addEventListener('mousedown', (e) => {
+        if (isClickOnDiscoverButton(e)) return;
+        isDragging = true;
+        startX = e.clientX;
+        clickStartTime = Date.now();
+        clickStartPosition = { x: startX, y: e.clientY };
+        container.style.cursor = 'grabbing';
+        e.preventDefault();
+    });
+
+    container.addEventListener('mousemove', (e) => {
+        if (!isDragging || isClickOnDiscoverButton(e)) return;
+        const diffX = e.clientX - startX;
+        
+        if (Math.abs(diffX) > 100) {
+            if (diffX > 0) {
+                prevCard();
+            } else {
+                nextCard();
+            }
+            isDragging = false;
+            container.style.cursor = 'grab';
+        }
+        e.preventDefault();
+    });
+
+    container.addEventListener('mouseup', (e) => {
+        if (isClickOnDiscoverButton(e)) return;
+        const timeDiff = Date.now() - clickStartTime;
+        const moveDistance = Math.sqrt(
+            Math.pow(e.clientX - clickStartPosition.x, 2) +
+            Math.pow(e.clientY - clickStartPosition.y, 2)
+        );
+        
+        if (timeDiff < 300 && moveDistance < 10) {
+            // Đây là click - không ngăn chặn
+            return;
+        }
+        
+        isDragging = false;
+        container.style.cursor = 'grab';
+        e.preventDefault();
+    });
+
+    container.addEventListener('mouseleave', (e) => {
+        if (isClickOnDiscoverButton(e)) return;
+        isDragging = false;
+        container.style.cursor = 'grab';
+        e.preventDefault();
+    });
+
+    // Prevent default touch behaviors chỉ khi không phải là discover button
+    document.addEventListener('touchmove', (e) => {
+        if (!isClickOnDiscoverButton(e)) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    // Initialize
+    updateCards();
+</script>
+</body>
+</html>
