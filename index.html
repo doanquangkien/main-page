@@ -24,15 +24,16 @@
     <link rel="icon" type="image/png" sizes="512x512"
         href="https://res.cloudinary.com/dvouakaon/image/upload/v1734032893/android-chrome-512x512_b8bzja.png">
     <link rel="icon" type="image/png" sizes="32x32"
-        href="https://res-cloudinary-com/dvouakaon/image/upload/v1734032893/favicon-32x32_pn3fl5.png">
+        href="https://res.cloudinary.com/dvouakaon/image/upload/v1734032893/favicon-32x32_pn3fl5.png">
     <link rel="icon" type="image/png" sizes="16x16"
-        href="https://res-cloudinary-com/dvouakaon/image/upload/v1734032892/favicon-16x16_kfbdd3.png">
+        href="https://res.cloudinary.com/dvouakaon/image/upload/v1734032892/favicon-16x16_kfbdd3.png">
 </head>
 
 <body>
     <header>
         <h1><i class="fas fa-chart-line"></i> Nhật Ký Giao Dịch Chuyên Nghiệp</h1>
-        <div id="statusMessage" style="display: none;"></div>
+        <!-- Dùng để hiển thị Toast Message -->
+        <div id="statusMessage" class="card"></div> 
     </header>
 
     <div class="container">
@@ -82,7 +83,7 @@
             </div>
         </section>
 
-        <!-- TÓM TẮT & THỐNG KÊ -->
+        <!-- TÓM TẮT & THỐNG KÊ (ĐÃ BỎ CHUỖI THẮNG/THUA) -->
         <section id="summary" class="card summary-grid">
             <h2><i class="fas fa-chart-pie"></i> Tóm Tắt & Thống Kê</h2>
             <div><i class="fas fa-calendar-check"></i>Tổng số ngày giao dịch: <span id="totalDays" class="summary-value">0</span> Ngày</div>
@@ -90,8 +91,6 @@
             <div><i class="fas fa-arrow-up"></i> Tổng số tiền đã nạp: <span id="totalDeposits" class="summary-value positive">0.00 $</span></div>
             <div><i class="fas fa-arrow-down"></i> Tổng số tiền đã rút: <span id="totalWithdrawals" class="summary-value negative">0.00 $</span></div>
             <div><i class="fas fa-percentage"></i> Tỷ lệ Thắng/Thua: <span id="winLossRatio" class="summary-value">0.00% / 0.00%</span></div>
-            <div><i class="fas fa-angle-double-up"></i> Chuỗi Thắng Dài nhất: <span id="maxWinStreak" class="summary-value positive">0</span> ngày</div>
-            <div><i class="fas fa-angle-double-down"></i> Chuỗi Thua Dài nhất: <span id="maxLossStreak" class="summary-value negative">0</span> ngày</div>
             <div><i class="fas fa-dollar-sign"></i> PNL Trung Bình: <span id="avgProfitLoss" class="summary-value">0.00 $</span></div>
             <div><i class="fas fa-chart-bar"></i>Tổng PNL (Lãi Ròng): <span id="totalProfitLoss" class="summary-value">0.00 $</span></div>
         </section>
