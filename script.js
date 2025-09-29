@@ -38,7 +38,7 @@ function displayTransactions() {
     const transactionsToDisplay = transactions.slice(startIndex, endIndex);
 
     transactionsToDisplay.forEach((transaction, index) => {
-        // Index trong mảng hiện tại đang hiển thị
+        // Index trong mảng đã sắp xếp (dùng để tìm giao dịch trước đó)
         appendTransactionToTable(transaction, transactions.indexOf(transaction)); 
     });
 
@@ -88,7 +88,6 @@ function calculateProfitLoss() {
     }
     
     if (!isNaN(initialCapital) && !isNaN(finalBalance)) {
-        // Có thể hiển thị PNL và % ra một ô/thông báo nào đó nếu muốn
         return calculateProfitLossFromValues(initialCapital, finalBalance);
     } 
     return null;
@@ -96,7 +95,7 @@ function calculateProfitLoss() {
 
 // --- LOGIC THÊM, SỬA, XÓA DỮ LIỆU ---
 
-// Tạo ID duy nhất (sử dụng Web Crypto API nếu có, hoặc fallback)
+// Tạo ID duy nhất
 function createUniqueId() {
     if (window.crypto && window.crypto.randomUUID) {
         return window.crypto.randomUUID();
@@ -169,14 +168,10 @@ function updateTransactionData(id, field, value) {
     // Kiểm tra tính hợp lệ
      if (isNaN(editedValue) || (field === 'initialCapital' && editedValue < 0)) {
          showStatusMessage('Vui lòng nhập một giá trị số hợp lệ (Vốn ban đầu không được âm).', 'error');
-         // Tải lại để khôi phục giá trị cũ
-         // Không cần loadAllTransactions() vì sẽ gây nháy bảng
-         // Thay vào đó, tìm và cập nhật lại ô vừa sửa
+         // Tìm và cập nhật lại ô vừa sửa bằng giá trị cũ
          const rowElement = document.querySelector(`tr[data-id="${id}"]`);
          if(rowElement){
-             // Lấy giá trị cũ từ đối tượng transactions
              const oldValue = transactions[transactionIndex][field].toFixed(2);
-             // Tìm ô (cell) và cập nhật lại nội dung
              const cellIndex = (field === 'initialCapital') ? 1 : 4; 
              rowElement.cells[cellIndex].textContent = oldValue;
          }
@@ -198,8 +193,7 @@ function updateTransactionData(id, field, value) {
     transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
     localStorage.setItem('transactions', JSON.stringify(transactions));
     
-    // Tối ưu: Chỉ cần cập nhật lại UI (summary và bảng)
-    loadAllTransactions(); // Tải lại để UI đồng bộ (bao gồm cả màu Vốn/Rút)
+    loadAllTransactions(); 
     showStatusMessage('Cập nhật giao dịch thành công.', 'success');
 }
 
@@ -219,13 +213,15 @@ function resetData() {
     }
 }
 
+// Hàm Toast Message mới
 function showStatusMessage(message, type) {
     statusMessage.textContent = message;
-    statusMessage.className = 'card'; // Reset class
-    statusMessage.classList.add(type);
-    statusMessage.style.display = 'block';
+    statusMessage.className = type; // success/error
+    statusMessage.classList.add('visible');
+    
+    // Tự động ẩn sau 3.5 giây
     setTimeout(() => {
-        statusMessage.style.display = 'none';
+        statusMessage.classList.remove('visible');
     }, 3500);
 }
 
@@ -263,11 +259,11 @@ function appendTransactionToTable(transaction, originalIndexInSortedArray) {
     transactionTableBody.appendChild(row);
 }
 
-// --- LOGIC TÓM TẮT VÀ THỐNG KÊ CHUYÊN NGHIỆP ---
+// --- LOGIC TÓM TẮT VÀ THỐNG KÊ CHUYÊN NGHIỆP (Đã bỏ Chuỗi Thắng/Thua) ---
 
 function calculateAdvancedStats() {
     if (transactions.length === 0) {
-        return { totalDays: 0, finalBalance: 0, totalProfitLoss: 0, totalDeposits: 0, totalWithdrawals: 0, winCount: 0, lossCount: 0, maxWinStreak: 0, maxLossStreak: 0, avgProfitLoss: 0 };
+        return { totalDays: 0, finalBalance: 0, totalProfitLoss: 0, totalDeposits: 0, totalWithdrawals: 0, winCount: 0, lossCount: 0, avgProfitLoss: 0 };
     }
 
     const uniqueDates = new Set();
@@ -276,16 +272,11 @@ function calculateAdvancedStats() {
     let totalWithdrawals = 0;
     let winCount = 0;
     let lossCount = 0;
-    let currentWinStreak = 0;
-    let currentLossStreak = 0;
-    let maxWinStreak = 0;
-    let maxLossStreak = 0;
 
-    // Phải xử lý mảng đã được sắp xếp theo NGÀY GIẢM DẦN (mới nhất lên đầu)
+    // Sắp xếp theo ngày TĂNG DẦN để tính toán Nạp/Rút liên tục
     const sortedByDateAsc = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date)); 
     let previousBalance = 0;
     
-    // TÍNH TOÁN TIỀN NẠP/RÚT VÀ CHUỖI THẮNG THUA
     sortedByDateAsc.forEach((transaction, index) => {
         const currentInitialCapital = transaction.initialCapital;
         const currentFinalBalance = transaction.finalBalance;
@@ -308,37 +299,29 @@ function calculateAdvancedStats() {
         }
         previousBalance = currentFinalBalance;
 
-        // Tính Chuỗi Thắng/Thua
+        // Tính Tỷ lệ Thắng/Thua
         if (currentProfitLoss > 0.01) {
             winCount++;
-            currentWinStreak++;
-            currentLossStreak = 0;
-            if (currentWinStreak > maxWinStreak) maxWinStreak = currentWinStreak;
         } else if (currentProfitLoss < -0.01) {
             lossCount++;
-            currentLossStreak++;
-            currentWinStreak = 0;
-            if (currentLossStreak > maxLossStreak) maxLossStreak = currentLossStreak;
-        } else {
-            currentWinStreak = 0;
-            currentLossStreak = 0;
         }
     });
 
     const totalTradingDays = winCount + lossCount;
     const avgProfitLoss = totalTradingDays > 0 ? totalProfitLoss / totalTradingDays : 0;
+    
+    // Lấy số dư cuối của giao dịch mới nhất (vì transactions đã sắp xếp giảm dần)
+    const finalBalance = transactions[0].finalBalance; 
 
     return {
         totalDays: uniqueDates.size,
-        finalBalance: sortedByDateAsc[sortedByDateAsc.length - 1].finalBalance, // Lấy số dư cuối của giao dịch mới nhất
+        finalBalance: finalBalance, 
         totalProfitLoss,
         totalDeposits,
         totalWithdrawals,
         winCount,
         lossCount,
         totalTradingDays,
-        maxWinStreak,
-        maxLossStreak,
         avgProfitLoss
     };
 }
@@ -347,8 +330,7 @@ function calculateAdvancedStats() {
 function updateSummary() {
     const stats = calculateAdvancedStats();
     
-    // Tổng PNL (lãi ròng) dựa trên Tổng nạp và Số dư cuối
-    const totalProfitLossPercentage = (stats.totalDeposits > 0) ? ((stats.finalBalance - stats.totalDeposits + stats.totalWithdrawals) / stats.totalDeposits) * 100 : 0;
+    // Tổng PNL (lãi ròng) dựa trên Số dư cuối - (Tổng nạp - Tổng rút)
     const finalProfitLoss = stats.finalBalance - stats.totalDeposits + stats.totalWithdrawals;
 
     const winRatio = stats.totalTradingDays > 0 ? (stats.winCount / stats.totalTradingDays) * 100 : 0;
@@ -362,8 +344,6 @@ function updateSummary() {
     
     // Thống kê nâng cao
     document.getElementById('winLossRatio').textContent = `${winRatio.toFixed(2)}% / ${lossRatio.toFixed(2)}%`;
-    document.getElementById('maxWinStreak').textContent = `${stats.maxWinStreak}`;
-    document.getElementById('maxLossStreak').textContent = `${stats.maxLossStreak}`;
     document.getElementById('avgProfitLoss').textContent = `${stats.avgProfitLoss.toFixed(2)} $`;
     
     // Đổi màu PNL tổng
