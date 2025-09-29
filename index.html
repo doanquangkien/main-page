@@ -1,342 +1,148 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Google Search</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            text-align: center;
-            background-color: #202124;
-            margin: 0;
-            padding: 10px;
-            min-height: 100vh;
-            min-height: -webkit-fill-available;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        html {
-            height: -webkit-fill-available;
-        }
-
-        .container {
-            padding: 20px;
-            background-color: #303134;
-            border-radius: 12px;
-            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
-            width: 95%;
-            max-width: 600px;
-            margin: auto;
-            transition: transform 0.3s ease;
-        }
-
-        @media (hover: hover) {
-            .container:hover {
-                transform: translateY(-5px);
-            }
-        }
-
-        .search-wrapper {
-            display: flex;
-            background: white;
-            border-radius: 1rem;
-            background: linear-gradient(135deg, #23272F 0%, #14161a 100%);
-            box-shadow: 10px 10px 20px #0e1013, -10px -10px 40px #383e4b;
-            padding: 0.3rem;
-            gap: 0.3rem;
-            margin: 0 auto;
-            max-width: 500px;
-        }
-
-        #urlInput {
-            border-radius: 0.8rem 0 0 0.8rem;
-            background: #23272F;
-            box-shadow: inset 5px 5px 10px #0e1013, inset -5px -5px 10px #383e4b;
-            width: 100%;
-            flex-basis: 75%;
-            padding: 1rem;
-            border: none;
-            border: 1px solid transparent;
-            color: white;
-            transition: all 0.2s ease-in-out;
-            font-family: 'Poppins', sans-serif;
-            font-size: 16px;
-        }
-
-        #urlInput:focus {
-            border: 1px solid #FFD43B;
-            outline: none;
-            box-shadow: inset 0px 0px 10px rgba(255, 102, 0, 0.5), 
-                        inset 0px 0px 10px rgba(255, 212, 59, 0.5), 
-                        0px 0px 100px rgba(255, 212, 59, 0.5), 
-                        0px 0px 100px rgba(255, 102, 0, 0.5);
-        }
-
-        #searchButton {
-            flex-basis: 25%;
-            padding: 1rem;
-            background: linear-gradient(135deg, rgb(255, 212, 59) 0%, rgb(255, 102, 0) 100%);
-            box-shadow: 0px 0px 1px rgba(255, 212, 59, 0.5), 
-                        0px 0px 1px rgba(255, 102, 0, 0.5);
-            font-weight: 900;
-            letter-spacing: 0.3rem;
-            text-transform: uppercase;
-            color: #23272F;
-            border: none;
-            width: auto;
-            border-radius: 0 1rem 1rem 0;
-            transition: all 0.2s ease-in-out;
-            margin-top: 0;
-            cursor: pointer;
-        }
-
-        @media (max-width: 500px) {
-            .search-wrapper {
-                flex-direction: column;
-            }
-
-            #urlInput {
-                border-radius: 0.8rem;
-            }
-
-            #searchButton {
-                padding: 1rem;
-                border-radius: 0.8rem;
-                width: 100%;
-            }
-        }
-
-        @media (hover: none) {
-            #searchButton:active {
-                transform: scale(0.98);
-                opacity: 0.9;
-            }
-        }
-
-        @media (hover: hover) {
-            #searchButton:hover {
-                transform: translateY(-2px);
-                background: linear-gradient(135deg, rgb(255, 212, 59) 50%, rgb(255, 102, 0) 100%);
-                box-shadow: 0px 0px 100px rgba(255, 212, 59, 0.5), 
-                           0px 0px 100px rgba(255, 102, 0, 0.5);
-            }
-        }
-
-        .result {
-            margin-top: 20px;
-            padding: 12px;
-            background-color: #303134;
-            border-radius: 8px;
-            text-align: left;
-            animation: fadeIn 0.5s ease;
-            font-size: 14px;
-            color: #e8eaed;
-        }
-
-        .result-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px;
-            border-radius: 4px;
-            transition: background-color 0.3s ease;
-            word-break: break-word;
-        }
-
-        .result-item:hover {
-            background-color: #3c4043;
-        }
-
-        .result-item strong {
-            font-weight: 500;
-            white-space: nowrap;
-            min-width: 120px;
-        }
-
-        @media (hover: none) {
-            .result-item {
-                padding: 8px;
-            }
-        }
-
-        .result-item .material-icons {
-            color: #4285f4;
-            flex-shrink: 0;
-            font-size: 20px;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .loading {
-            animation: rotate 1s linear infinite;
-            color: #4285f4;
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 15px;
-                width: 100%;
-            }
-
-            h1 {
-                font-size: 1.5rem;
-            }
-
-            #urlInput {
-                font-size: 16px;
-            }
-
-            .result-item {
-                font-size: 13px;
-            }
-        }
-
-        #urlInput:-webkit-autofill,
-        #urlInput:-webkit-autofill:hover,
-        #urlInput:-webkit-autofill:focus {
-            -webkit-box-shadow: inset 5px 5px 10px #0e1013, 
-                               inset -5px -5px 10px #383e4b;
-            -webkit-text-fill-color: white;
-        }
-
-        .google-logo {
-            width: 120px;
-            height: auto;
-            margin-bottom: 8px;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhật Ký Giao Dịch Chuyên Nghiệp</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Thư viện Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Thư viện Moment.js (Để xử lý ngày tháng) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <!-- Thư viện XLSX (Để xuất/nhập Excel) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Thư viện Chart.js (Để vẽ biểu đồ) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <!-- Favicon (Giữ nguyên) -->
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180"
+        href="https://res.cloudinary.com/dvouakaon/image/upload/v1734032893/apple-touch-icon_fpnc8i.png">
+    <link rel="icon" type="image/png" sizes="192x192"
+        href="https://res.cloudinary.com/dvouakaon/image/upload/v1734032893/android-chrome-192x192_v5akgc.png">
+    <link rel="icon" type="image/png" sizes="512x512"
+        href="https://res.cloudinary.com/dvouakaon/image/upload/v1734032893/android-chrome-512x512_b8bzja.png">
+    <link rel="icon" type="image/png" sizes="32x32"
+        href="https://res.cloudinary.com/dvouakaon/image/upload/v1734032893/favicon-32x32_pn3fl5.png">
+    <link rel="icon" type="image/png" sizes="16x16"
+        href="https://res.cloudinary.com/dvouakaon/image/upload/v1734032892/favicon-16x16_kfbdd3.png">
 </head>
-<body>
-    <div class="container">
-        <svg class="google-logo" viewBox="0 0 272 92" xmlns="http://www.w3.org/2000/svg">
-            <path d="M115.75 47.18c0 12.77-9.99 22.18-22.25 22.18s-22.25-9.41-22.25-22.18C71.25 34.32 81.24 25 93.5 25s22.25 9.32 22.25 22.18zm-9.74 0c0-7.98-5.79-13.44-12.51-13.44S80.99 39.2 80.99 47.18c0 7.9 5.79 13.44 12.51 13.44s12.51-5.55 12.51-13.44z" fill="#EA4335"/>
-            <path d="M163.75 47.18c0 12.77-9.99 22.18-22.25 22.18s-22.25-9.41-22.25-22.18c0-12.85 9.99-22.18 22.25-22.18s22.25 9.32 22.25 22.18zm-9.74 0c0-7.98-5.79-13.44-12.51-13.44s-12.51 5.46-12.51 13.44c0 7.9 5.79 13.44 12.51 13.44s12.51-5.55 12.51-13.44z" fill="#FBBC05"/>
-            <path d="M209.75 26.34v39.82c0 16.38-9.66 23.07-21.08 23.07-10.75 0-17.22-7.19-19.66-13.07l8.48-3.53c1.51 3.61 5.21 7.87 11.17 7.87 7.31 0 11.84-4.51 11.84-13v-3.19h-.34c-2.18 2.69-6.38 5.04-11.68 5.04-11.09 0-21.25-9.66-21.25-22.09 0-12.52 10.16-22.26 21.25-22.26 5.29 0 9.49 2.35 11.68 4.96h.34v-3.61h9.25zm-8.56 20.92c0-7.81-5.21-13.52-11.84-13.52-6.72 0-12.35 5.71-12.35 13.52 0 7.73 5.63 13.36 12.35 13.36 6.63 0 11.84-5.63 11.84-13.36z" fill="#4285F4"/>
-            <path d="M225 3v65h-9.5V3h9.5z" fill="#34A853"/>
-            <path d="M262.02 54.48l7.56 5.04c-2.44 3.61-8.32 9.83-18.48 9.83-12.6 0-22.01-9.74-22.01-22.18 0-13.19 9.49-22.18 20.92-22.18 11.51 0 17.14 9.16 18.98 14.11l1.01 2.52-29.65 12.28c2.27 4.45 5.8 6.72 10.75 6.72 4.96 0 8.4-2.44 10.92-6.14zm-23.27-7.98l19.82-8.23c-1.09-2.77-4.37-4.7-8.23-4.7-4.95 0-11.84 4.37-11.59 12.93z" fill="#EA4335"/>
-            <path d="M35.29 41.41V32H67c.31 1.64.47 3.58.47 5.68 0 7.06-1.93 15.79-8.15 22.01-6.05 6.3-13.78 9.66-24.02 9.66C16.32 69.35.36 53.89.36 34.91.36 15.93 16.32.47 35.3.47c10.5 0 17.98 4.12 23.6 9.49l-6.64 6.64c-4.03-3.78-9.49-6.72-16.97-6.72-13.86 0-24.7 11.17-24.7 25.03 0 13.86 10.84 25.03 24.7 25.03 8.99 0 14.11-3.61 17.39-6.89 2.66-2.66 4.41-6.46 5.1-11.65l-22.49.01z" fill="#4285F4"/>
-        </svg>
-        
-        <div id="searchBar">
-            <div class="search-wrapper">
-                <input type="text" id="urlInput" 
-                       placeholder="Enter a keyword..."
-                       autocomplete="off" 
-                       autocapitalize="off" 
-                       autocorrect="off">
-                <button id="searchButton" onclick="search()">
-                    Search
-                </button>
-            </div>
-        </div>
 
-        <div class="result" id="ipInfo"></div>
+<body>
+    <header>
+        <h1><i class="fas fa-chart-line"></i> Nhật Ký Giao Dịch Chuyên Nghiệp</h1>
+        <div id="statusMessage" style="display: none;"></div>
+    </header>
+
+    <div class="container">
+        <!-- FORM THÊM GIAO DỊCH -->
+        <section id="transactionForm" class="card">
+            <h2><i class="fas fa-plus-circle"></i> Thêm Giao Dịch Mới</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="date"><i class="far fa-calendar"></i> Ngày Giao Dịch:</label>
+                    <input type="date" id="date">
+                </div>
+                <div class="form-group">
+                    <label for="initialCapital"><i class="fas fa-dollar-sign"></i> Vốn Ban Đầu:</label>
+                    <input type="number" id="initialCapital" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="finalBalance"><i class="fas fa-coins"></i> Số Dư Cuối:</label>
+                    <input type="number" id="finalBalance" step="0.01" oninput="calculateProfitLoss()">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button onclick="addTransaction()"><i class="fas fa-plus"></i> THÊM GIAO DỊCH</button>
+                <button onclick="resetData()" class="reset-button"><i class="fas fa-trash-alt"></i> Reset Dữ Liệu</button>
+            </div>
+        </section>
+
+        <!-- TÓM TẮT & THỐNG KÊ -->
+        <section id="summary" class="card summary-grid">
+            <h2><i class="fas fa-chart-pie"></i> Tóm Tắt & Thống Kê</h2>
+            <div><i class="fas fa-calendar-check"></i>Tổng số ngày giao dịch: <span id="totalDays" class="summary-value">0</span> Ngày</div>
+            <div><i class="fas fa-wallet"></i>Số dư cuối: <span id="finalBalanceSummary" class="summary-value">0.00 $</span></div>
+            <div><i class="fas fa-arrow-up"></i> Tổng số tiền đã nạp: <span id="totalDeposits" class="summary-value positive">0.00 $</span></div>
+            <div><i class="fas fa-arrow-down"></i> Tổng số tiền đã rút: <span id="totalWithdrawals" class="summary-value negative">0.00 $</span></div>
+            <div><i class="fas fa-percentage"></i> Tỷ lệ Thắng/Thua: <span id="winLossRatio" class="summary-value">0.00% / 0.00%</span></div>
+            <div><i class="fas fa-angle-double-up"></i> Chuỗi Thắng Dài nhất: <span id="maxWinStreak" class="summary-value positive">0</span> ngày</div>
+            <div><i class="fas fa-angle-double-down"></i> Chuỗi Thua Dài nhất: <span id="maxLossStreak" class="summary-value negative">0</span> ngày</div>
+            <div><i class="fas fa-dollar-sign"></i> PNL Trung Bình: <span id="avgProfitLoss" class="summary-value">0.00 $</span></div>
+            <div><i class="fas fa-chart-bar"></i>Tổng PNL (Lãi Ròng): <span id="totalProfitLoss" class="summary-value">0.00 $</span></div>
+        </section>
+
+        <!-- BIỂU ĐỒ TRỰC QUAN HÓA -->
+        <section id="chartSection" class="card">
+             <h2><i class="fas fa-chart-area"></i> Biểu Đồ PNL Theo Ngày</h2>
+             <canvas id="pnlChart"></canvas>
+        </section>
+
+        <!-- CHỨC NĂNG EXCEL -->
+        <section id="excelControls" class="card form-actions">
+            <div class="export-group">
+                <label for="exportMonth">Chọn tháng/năm để xuất:</label>
+                <select id="exportMonth">
+                    <option value="">Tất cả các tháng</option>
+                    <option value="0">Tháng 1</option>
+                    <option value="1">Tháng 2</option>
+                    <option value="2">Tháng 3</option>
+                    <option value="3">Tháng 4</option>
+                    <option value="4">Tháng 5</option>
+                    <option value="5">Tháng 6</option>
+                    <option value="6">Tháng 7</option>
+                    <option value="7">Tháng 8</option>
+                    <option value="8">Tháng 9</option>
+                    <option value="9">Tháng 10</option>
+                    <option value="10">Tháng 11</option>
+                    <option value="11">Tháng 12</option>
+                </select>
+                <input type="number" id="exportYear" placeholder="Năm (vd: 2024)">
+                <button onclick="exportToExcelByMonth()"><i class="fas fa-file-excel"></i> Xuất Excel</button>
+            </div>
+
+            <div class="import-group">
+                <label for="importFile"><i class="fas fa-upload"></i> Nhập file Excel:</label>
+                <input type="file" id="importFile" accept=".xlsx, .xls">
+                <button onclick="importFromExcel()"><i class="fas fa-file-import"></i> Nhập Excel</button>
+            </div>
+        </section>
+
+        <!-- BẢNG GIAO DỊCH -->
+        <section id="transactionList" class="card">
+            <h2><i class="fas fa-list-alt"></i> Chi Tiết Giao Dịch</h2>
+            <table id="transactionTable">
+                <thead>
+                    <tr>
+                        <th><i class="far fa-calendar-alt"></i> Date</th>
+                        <th><i class="fas fa-dollar-sign"></i> Vốn</th>
+                        <th><i class="fas fa-chart-bar"></i> PNL</th>
+                        <th><i class="fas fa-percentage"></i> %</th>
+                        <th><i class="fas fa-coins"></i> Số dư</th>
+                        <th><i class="fas fa-trash"></i></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dữ liệu sẽ được chèn vào đây bởi JavaScript -->
+                </tbody>
+            </table>
+            <div id="pagination-controls">
+                <button id="loadMoreBtn" onclick="loadMoreTransactions()" style="display: none;"><i class="fas fa-sync-alt"></i> Xem thêm 10 ngày giao dịch</button>
+            </div>
+        </section>
+
+        <p class="warning-note"><i class="far fa-times-circle"></i> Dữ liệu được lưu trên trình duyệt web, bạn sẽ mất dữ liệu nếu đổi trình duyệt hoặc xóa cache web! Hãy xuất Excel để sao lưu thường xuyên.</p>
+
+        <center><a href="https://nofaw.com/apps/">
+            <button class="call-to-action-btn">
+                Tìm hiểu thêm <i class="fas fa-arrow-down"></i>
+            </button>
+        </a></center>
     </div>
 
-    <script>
-        let searchTimeout;
-
-        function search() {
-            const query = document.getElementById('urlInput').value.trim();
-            if (query) {
-                const searchUrl = https://www.google.com/search?q=${encodeURIComponent(query)};
-                window.location.href = searchUrl;
-            } else {
-                const input = document.getElementById('urlInput');
-                input.classList.add('shake');
-                setTimeout(() => input.classList.remove('shake'), 500);
-                input.focus();
-            }
-        }
-
-        document.getElementById('urlInput').addEventListener('focus', function(e) {
-            setTimeout(function() {
-                document.body.scrollTop = 0;
-            }, 50);
-        });
-
-        document.getElementById('urlInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                search();
-            }
-        });
-
-        document.getElementById('urlInput').addEventListener('input', function(e) {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-            }, 300);
-        });
-
-        async function getIPInfo() {
-            try {
-                document.getElementById("ipInfo").innerHTML = `
-                    <div class="result-item">
-                        <span class="material-icons loading">refresh</span>
-                        Loading information...
-                    </div>
-                `;
-                
-                const response = await fetch("https://ipwhois.app/json/");
-                const data = await response.json();
-
-                const info = [
-                    { icon: 'router', label: 'IP Address', value: data.ip },
-                    { icon: 'location_city', label: 'City', value: data.city },
-{ icon: 'map', label: 'Region', value: data.region },
-                    { icon: 'public', label: 'Country', value: ${data.country || 'N/A'} ${data.country_code ? `(${data.country_code}) : ''}` },
-                    { icon: 'business', label: 'ISP', value: data.isp },
-                    { icon: 'domain', label: 'Organization', value: data.org },
-                    { icon: 'devices', label: 'Device', value: navigator.userAgent }
-                ];
-
-                document.getElementById("ipInfo").innerHTML = info
-                    .map(item => `
-                        <div class="result-item">
-                            <span class="material-icons">${item.icon}</span>
-                            <strong>${item.label}:</strong> ${item.value || 'N/A'}
-                        </div>
-                    `)
-                    .join('');
-
-            } catch (error) {
-                document.getElementById("ipInfo").innerHTML = `
-                    <div class="result-item">
-                        <span class="material-icons">error</span>
-                        Unable to retrieve IP information. Please try again later.
-                    </div>
-                `;
-            }
-        }
-
-        window.onerror = function(msg, url, lineNo, columnNo, error) {
-            console.error('Error: ', msg, 'URL: ', url, 'Line: ', lineNo, 'Column: ', columnNo, 'Error object: ', error);
-            return false;
-        };
-
-        window.onload = getIPInfo;
-    </script>
+    <!-- Script chính -->
+    <script src="script.js"></script>
 </body>
+
 </html>
