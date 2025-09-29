@@ -210,24 +210,40 @@ td[contenteditable="true"] {
     flex-grow: 1;
 }
 
-/* STATUS MESSAGE */
+/* STATUS MESSAGE (CHUYỂN THÀNH TOAST) */
 #statusMessage {
-    padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 5px;
-    text-align: center;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    margin-bottom: 0;
+    border-radius: 8px;
+    text-align: left;
     font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000; /* Đảm bảo nằm trên mọi thứ */
+    transition: all 0.5s ease-in-out;
+    opacity: 0;
+    transform: translateX(100%);
+    display: block !important; /* Luôn hiển thị block, dùng opacity/transform để ẩn/hiện */
 }
+
+#statusMessage.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
 .success {
     background-color: #e8f5e9;
     color: #4CAF50;
-    border: 1px solid #4CAF50;
+    border-left: 5px solid #4CAF50;
 }
 .error {
     background-color: #fee;
     color: #ff4444;
-    border: 1px solid #ff4444;
+    border-left: 5px solid #ff4444;
 }
+
 
 /* CUSTOM CLASSES */
 .positive {
@@ -333,5 +349,19 @@ td[contenteditable="true"] {
     th, td {
         white-space: nowrap; /* Đảm bảo nội dung không bị ngắt dòng */
         padding: 10px 8px; /* Giảm padding một chút */
+    }
+
+    /* responsive: trên mobile, toast nằm ở giữa dưới */
+    #statusMessage {
+        top: auto;
+        bottom: 20px;
+        left: 50%;
+        right: auto;
+        transform: translateX(calc(-50% + 100%));
+        width: 80%;
+        text-align: center;
+    }
+    #statusMessage.visible {
+        transform: translateX(-50%);
     }
 }
