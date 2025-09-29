@@ -24,9 +24,9 @@
     <link rel="icon" type="image/png" sizes="512x512"
         href="https://res.cloudinary.com/dvouakaon/image/upload/v1734032893/android-chrome-512x512_b8bzja.png">
     <link rel="icon" type="image/png" sizes="32x32"
-        href="https://res.cloudinary.com/dvouakaon/image/upload/v1734032893/favicon-32x32_pn3fl5.png">
+        href="https://res-cloudinary-com/dvouakaon/image/upload/v1734032893/favicon-32x32_pn3fl5.png">
     <link rel="icon" type="image/png" sizes="16x16"
-        href="https://res.cloudinary.com/dvouakaon/image/upload/v1734032892/favicon-16x16_kfbdd3.png">
+        href="https://res-cloudinary-com/dvouakaon/image/upload/v1734032892/favicon-16x16_kfbdd3.png">
 </head>
 
 <body>
@@ -56,6 +56,29 @@
             <div class="form-actions">
                 <button onclick="addTransaction()"><i class="fas fa-plus"></i> THÊM GIAO DỊCH</button>
                 <button onclick="resetData()" class="reset-button"><i class="fas fa-trash-alt"></i> Reset Dữ Liệu</button>
+            </div>
+        </section>
+
+        <!-- BẢNG GIAO DỊCH (ĐÃ ĐƯA LÊN TRÊN) -->
+        <section id="transactionList" class="card">
+            <h2><i class="fas fa-list-alt"></i> Chi Tiết Giao Dịch</h2>
+            <table id="transactionTable">
+                <thead>
+                    <tr>
+                        <th><i class="far fa-calendar-alt"></i> Date</th>
+                        <th><i class="fas fa-dollar-sign"></i> Vốn</th>
+                        <th><i class="fas fa-chart-bar"></i> PNL</th>
+                        <th><i class="fas fa-percentage"></i> %</th>
+                        <th><i class="fas fa-coins"></i> Số dư</th>
+                        <th><i class="fas fa-trash"></i></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dữ liệu sẽ được chèn vào đây bởi JavaScript -->
+                </tbody>
+            </table>
+            <div id="pagination-controls">
+                <button id="loadMoreBtn" onclick="loadMoreTransactions()" style="display: none;"><i class="fas fa-sync-alt"></i> Xem thêm 10 ngày giao dịch</button>
             </div>
         </section>
 
@@ -106,29 +129,6 @@
                 <label for="importFile"><i class="fas fa-upload"></i> Nhập file Excel:</label>
                 <input type="file" id="importFile" accept=".xlsx, .xls">
                 <button onclick="importFromExcel()"><i class="fas fa-file-import"></i> Nhập Excel</button>
-            </div>
-        </section>
-
-        <!-- BẢNG GIAO DỊCH -->
-        <section id="transactionList" class="card">
-            <h2><i class="fas fa-list-alt"></i> Chi Tiết Giao Dịch</h2>
-            <table id="transactionTable">
-                <thead>
-                    <tr>
-                        <th><i class="far fa-calendar-alt"></i> Date</th>
-                        <th><i class="fas fa-dollar-sign"></i> Vốn</th>
-                        <th><i class="fas fa-chart-bar"></i> PNL</th>
-                        <th><i class="fas fa-percentage"></i> %</th>
-                        <th><i class="fas fa-coins"></i> Số dư</th>
-                        <th><i class="fas fa-trash"></i></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Dữ liệu sẽ được chèn vào đây bởi JavaScript -->
-                </tbody>
-            </table>
-            <div id="pagination-controls">
-                <button id="loadMoreBtn" onclick="loadMoreTransactions()" style="display: none;"><i class="fas fa-sync-alt"></i> Xem thêm 10 ngày giao dịch</button>
             </div>
         </section>
 
