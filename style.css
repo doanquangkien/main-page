@@ -323,14 +323,15 @@ td[contenteditable="true"] {
         width: 100%;
     }
 
-    /* Bảng cuộn ngang */
+    /* Bảng cuộn ngang (Cải tiến để đảm bảo hoạt động) */
     #transactionList {
         overflow-x: auto;
     }
     table {
-        min-width: 600px; /* Đảm bảo bảng đủ rộng để cuộn */
+        min-width: 650px; /* Đảm bảo bảng có độ rộng tối thiểu để kích hoạt cuộn ngang */
     }
     th, td {
-        white-space: nowrap;
+        white-space: nowrap; /* Đảm bảo nội dung không bị ngắt dòng */
+        padding: 10px 8px; /* Giảm padding một chút */
     }
 }
