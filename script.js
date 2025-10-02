@@ -9,6 +9,25 @@ let transactions = [];
 let currentPage = 1;
 let pnlChartInstance = null; 
 
+// ... (Các hàm formatCurrency, formatPercentage, handleEnterKey, formatTableCurrency đã bị loại bỏ/giữ nguyên) ...
+function formatCurrency(value) {
+    const num = parseFloat(value);
+    if (isNaN(num)) return `0.00 $`;
+    return `${num.toFixed(2)} $`;
+}
+
+function formatPercentage(value) {
+    const num = parseFloat(value);
+    if (isNaN(num)) return `0.00%`;
+    return `${num.toFixed(2)}%`; 
+}
+
+function handleEnterKey(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault(); // Ngăn hành vi submit form mặc định
+        addTransaction();
+    }
+}
 // --- CHỨC NĂNG KHỞI TẠO VÀ TẢI DỮ LIỆU ---
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,51 +35,55 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('exportYear').value = new Date().getFullYear();
     document.getElementById('date').value = moment().format('YYYY-MM-DD');
     
-    // THÊM LISTENER CHO PHÍM ENTER
     transactionForm.addEventListener('keyup', handleEnterKey);
 });
-
-// Hàm xử lý nhấn Enter
-function handleEnterKey(event) {
-    if (event.key === 'Enter') {
-        event.preventDefault(); // Ngăn hành vi submit form mặc định
-        addTransaction();
-    }
-}
 
 // Tải tất cả giao dịch từ LocalStorage
 function loadAllTransactions() {
     transactions = JSON.parse(localStorage.getItem('transactions')) || [];
     
-    // CHỈNH SỬA: Sắp xếp theo ngày TĂNG DẦN (Cũ nhất lên đầu)
+    // Sắp xếp theo ngày TĂNG DẦN (Cũ nhất lên đầu)
     transactions.sort((a, b) => new Date(a.date) - new Date(b.date)); 
     
-    currentPage = 1;
+    currentPage = 1; // Luôn bắt đầu từ trang 1
     displayTransactions();
     updateSummary();
     drawChart(); 
 }
 
-// Hiển thị giao dịch (áp dụng logic phân trang - Bắt đầu từ Cũ nhất)
+// Hiển thị giao dịch (FIX LỖI PHÂN TRANG: Luôn hiển thị các giao dịch MỚI NHẤT)
 function displayTransactions() {
     transactionTableBody.innerHTML = '';
     
-    // CHỈNH SỬA LOGIC PHÂN TRANG:
-    // Vì mảng đã sắp xếp TĂNG DẦN (Cũ nhất -> Mới nhất), chúng ta chỉ cần lấy slice từ đầu mảng
-    const startIndex = 0;
-    const endIndex = currentPage * TRANSACTIONS_PER_PAGE;
+    const totalTransactions = transactions.length;
+    const itemsToDisplay = currentPage * TRANSACTIONS_PER_PAGE;
     
+    // Bắt đầu từ đầu mảng (Cũ nhất) đến số lượng cần hiển thị (kết thúc ở Mới nhất)
+    const startIndex = 0;
+    const endIndex = Math.min(itemsToDisplay, totalTransactions);
+    
+    // Lấy slice từ đầu (T1, T2, ... T_endIndex)
     const transactionsToDisplay = transactions.slice(startIndex, endIndex);
 
     transactionsToDisplay.forEach((transaction, index) => {
-        // Giao dịch trước đó sẽ là transactions[index - 1] trong mảng đã sắp xếp này
-        appendTransactionToTable(transaction, index); 
+        // index ở đây là index trong mảng transactionsToDisplay
+        // transactions.indexOf(transaction) là index trong mảng transactions gốc
+        appendTransactionToTable(transaction, transactions.indexOf(transaction)); 
     });
 
-    if (endIndex < transactions.length) {
+    // Cập nhật nút "Xem thêm": Chỉ hiển thị nếu còn giao dịch CHƯA được hiển thị
+    if (endIndex < totalTransactions) {
         loadMoreBtn.style.display = 'block';
     } else {
         loadMoreBtn.style.display = 'none';
+    }
+    
+    // Tự động cuộn xuống cuối bảng (giao dịch mới nhất) sau khi tải thêm
+    if (currentPage > 1) {
+         const tableContainer = document.getElementById('transactionList');
+         if(tableContainer) {
+             tableContainer.scrollTop = tableContainer.scrollHeight;
+         }
     }
 }
 
@@ -72,7 +95,7 @@ function loadMoreTransactions() {
 
 // --- LOGIC TÍNH TOÁN CƠ BẢN ---
 
-// Hàm tính toán PNL và % từ Vốn và Số dư
+// Hàm tính toán PNL và % từ Vốn và Số dư (Giữ nguyên)
 function calculateProfitLossFromValues(initialCapital, finalBalance) {
     initialCapital = parseFloat(initialCapital) || 0;
     finalBalance = parseFloat(finalBalance) || 0;
@@ -85,16 +108,15 @@ function calculateProfitLossFromValues(initialCapital, finalBalance) {
     };
 }
 
-// Tự động tính toán khi nhập Số dư cuối
+// Tự động tính toán khi nhập Số dư cuối (Giữ nguyên)
 function calculateProfitLoss() {
     const initialCapitalInput = document.getElementById('initialCapital');
     const finalBalanceInput = document.getElementById('finalBalance');
     let initialCapital = parseFloat(initialCapitalInput.value);
     const finalBalance = parseFloat(finalBalanceInput.value);
 
-    // CHỈNH SỬA LOGIC: Lấy số dư cuối của giao dịch MỚI NHẤT (transactions[transactions.length - 1])
+    // Lấy số dư cuối của giao dịch MỚI NHẤT (phần tử cuối của mảng tăng dần)
     if (transactions.length > 0 && !initialCapitalInput.value && finalBalanceInput === document.activeElement) {
-        // Mảng đã sắp xếp TĂNG DẦN (Cũ -> Mới), nên giao dịch mới nhất là phần tử cuối
         const lastTransaction = transactions[transactions.length - 1]; 
         initialCapitalInput.value = lastTransaction.finalBalance.toFixed(2);
         initialCapital = parseFloat(initialCapitalInput.value);
@@ -106,7 +128,7 @@ function calculateProfitLoss() {
     return null;
 }
 
-// Tạo ID duy nhất
+// Tạo ID duy nhất (Giữ nguyên)
 function createUniqueId() {
     if (window.crypto && window.crypto.randomUUID) {
         return window.crypto.randomUUID();
@@ -119,7 +141,6 @@ function addTransaction() {
     const initialCapitalInput = document.getElementById('initialCapital');
     const finalBalance = parseFloat(document.getElementById('finalBalance').value);
     
-    // Auto-fill Vốn ban đầu nếu trống (logic đã được điều chỉnh trong calculateProfitLoss)
     if (!initialCapitalInput.value && transactions.length > 0) {
         initialCapitalInput.value = transactions[transactions.length - 1].finalBalance.toFixed(2);
     }
@@ -144,6 +165,8 @@ function addTransaction() {
         localStorage.setItem('transactions', JSON.stringify(transactions));
         
         clearForm();
+        // Cố tình đặt currentPage ở mức tối đa để giao dịch mới nhất hiển thị ngay
+        currentPage = Math.ceil(transactions.length / TRANSACTIONS_PER_PAGE); 
         loadAllTransactions(); 
         showStatusMessage('Thêm giao dịch thành công!', 'success');
     } else {
@@ -194,7 +217,6 @@ function updateTransactionData(id, field, value) {
     transactions[transactionIndex].profitLoss = parseFloat(profitLoss);
     transactions[transactionIndex].profitPercentage = parseFloat(profitPercentage);
     
-    // Sắp xếp lại (TĂNG DẦN)
     transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
     localStorage.setItem('transactions', JSON.stringify(transactions));
     
@@ -226,16 +248,16 @@ function showStatusMessage(message, type) {
     }, 3500);
 }
 
-function appendTransactionToTable(transaction, index) {
+function appendTransactionToTable(transaction, originalIndexInSortedArray) {
     const row = document.createElement('tr');
     row.setAttribute('data-id', transaction.id);
 
     const profitClass = transaction.profitLoss >= 0 ? 'positive' : 'negative';
     let capitalChangeClass = '';
     
-    // Tìm giao dịch trước đó: Index hiện tại - 1 (vì mảng đã sắp xếp tăng dần)
-    if (index > 0) { 
-        const previousTransaction = transactions[index - 1];
+    // Dùng originalIndexInSortedArray là index trong mảng transactions đã sắp xếp tăng dần
+    if (originalIndexInSortedArray > 0) { 
+        const previousTransaction = transactions[originalIndexInSortedArray - 1];
         const previousBalance = previousTransaction ? previousTransaction.finalBalance : 0;
         const currentInitialCapital = transaction.initialCapital;
         const difference = currentInitialCapital - previousBalance;
@@ -279,7 +301,6 @@ function calculateAdvancedStats() {
     let winCount = 0;
     let lossCount = 0;
 
-    // Mảng đã sắp xếp TĂNG DẦN
     const sortedByDateAsc = transactions; 
     let previousBalance = 0;
     
@@ -335,15 +356,14 @@ function updateSummary() {
     
     const finalProfitLoss = stats.finalBalance - stats.totalDeposits + stats.totalWithdrawals;
 
-    const winRatio = stats.totalTradingDays > 0 ? (stats.winCount / stats.totalTradingDays) * 100 : 0;
-    const lossRatio = stats.totalTradingDays > 0 ? (stats.lossCount / stats.totalTradingDays) * 100 : 0;
-
     document.getElementById('totalDays').textContent = stats.totalDays; 
     document.getElementById('totalProfitLoss').textContent = formatCurrency(finalProfitLoss);
     document.getElementById('finalBalanceSummary').textContent = formatCurrency(stats.finalBalance);
     document.getElementById('totalDeposits').textContent = formatCurrency(stats.totalDeposits);
     document.getElementById('totalWithdrawals').textContent = formatCurrency(stats.totalWithdrawals);
     
+    const winRatio = stats.totalTradingDays > 0 ? (stats.winCount / stats.totalTradingDays) * 100 : 0;
+    const lossRatio = stats.totalTradingDays > 0 ? (stats.lossCount / stats.totalTradingDays) * 100 : 0;
     document.getElementById('winLossRatio').textContent = `${formatPercentage(winRatio)} / ${formatPercentage(lossRatio)}`;
     document.getElementById('avgProfitLoss').textContent = formatCurrency(stats.avgProfitLoss);
     
@@ -369,7 +389,6 @@ function drawChart() {
     }
     document.getElementById('chartSection').style.display = 'block'; 
 
-    // Mảng đã sắp xếp TĂNG DẦN (Cũ -> Mới) đã sẵn sàng để vẽ biểu đồ
     const sortedTransactions = transactions; 
     
     const labels = sortedTransactions.map(t => t.date);
@@ -381,8 +400,6 @@ function drawChart() {
         return cumulativePnl;
     });
     
-    // ... (logic Chart.js giữ nguyên) ...
-
     const ctx = pnlChartCanvas.getContext('2d');
     pnlChartInstance = new Chart(ctx, {
         type: 'line',
@@ -456,7 +473,6 @@ function exportToExcelByMonth() {
         return;
     }
     
-     // Luôn sắp xếp TĂNG DẦN khi xuất Excel
      filteredTransactions.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const data = [
