@@ -51,7 +51,7 @@ function displayTransactions() {
     // Cập nhật nút "Xem thêm": Chỉ hiển thị nếu còn giao dịch CŨ HƠN CHƯA được hiển thị (startIndex > 0)
     if (startIndex > 0) {
         // Cập nhật số lượng còn lại cần xem thêm
-        loadMoreBtn.textContent = `Xem thêm ${startIndex} ngày giao dịch cũ hơn`;
+        loadMoreBtn.textContent = `Xem thêm ${startIndex} giao dịch cũ hơn`;
         loadMoreBtn.style.display = 'block';
     } else {
         loadMoreBtn.style.display = 'none';
