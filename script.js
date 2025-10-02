@@ -9,7 +9,7 @@ let transactions = [];
 let currentPage = 1;
 let pnlChartInstance = null; 
 
-// ... (Các hàm formatCurrency, formatPercentage, handleEnterKey, formatTableCurrency đã bị loại bỏ/giữ nguyên) ...
+// --- CÁC HÀM TIỆN ÍCH (Giữ nguyên) ---
 function formatCurrency(value) {
     const num = parseFloat(value);
     if (isNaN(num)) return `0.00 $`;
@@ -24,7 +24,7 @@ function formatPercentage(value) {
 
 function handleEnterKey(event) {
     if (event.key === 'Enter') {
-        event.preventDefault(); // Ngăn hành vi submit form mặc định
+        event.preventDefault(); 
         addTransaction();
     }
 }
@@ -42,48 +42,43 @@ document.addEventListener('DOMContentLoaded', () => {
 function loadAllTransactions() {
     transactions = JSON.parse(localStorage.getItem('transactions')) || [];
     
-    // Sắp xếp theo ngày TĂNG DẦN (Cũ nhất lên đầu)
+    // Sắp xếp theo ngày TĂNG DẦN (Cũ nhất lên đầu) - Bắt buộc giữ nguyên thứ tự thời gian trong bảng
     transactions.sort((a, b) => new Date(a.date) - new Date(b.date)); 
     
-    currentPage = 1; // Luôn bắt đầu từ trang 1
+    // Giữ nguyên currentPage sau khi Load/Add để biết đang xem đến đâu
+    // Nếu vừa Add, currentPage đã được set để hiển thị trang mới nhất
     displayTransactions();
     updateSummary();
     drawChart(); 
 }
 
-// Hiển thị giao dịch (FIX LỖI PHÂN TRANG: Luôn hiển thị các giao dịch MỚI NHẤT)
+// Hiển thị giao dịch (FIX LỖI PHÂN TRANG: Load More ngược - Hiển thị các giao dịch MỚI NHẤT)
 function displayTransactions() {
     transactionTableBody.innerHTML = '';
     
     const totalTransactions = transactions.length;
     const itemsToDisplay = currentPage * TRANSACTIONS_PER_PAGE;
     
-    // Bắt đầu từ đầu mảng (Cũ nhất) đến số lượng cần hiển thị (kết thúc ở Mới nhất)
-    const startIndex = 0;
-    const endIndex = Math.min(itemsToDisplay, totalTransactions);
+    // Tính toán Start Index để luôn hiển thị các giao dịch MỚI NHẤT trước
+    // Ví dụ: N=13, itemsToDisplay=10 (Trang 1). StartIndex = 13 - 10 = 3. Hiển thị T3 -> T13 (Mới nhất)
+    // Ví dụ: N=13, itemsToDisplay=20 (Trang 2). StartIndex = 13 - 20 = -7 -> 0. Hiển thị T0 -> T13 (Tất cả)
+    const startIndex = Math.max(0, totalTransactions - itemsToDisplay); 
+    const endIndex = totalTransactions;
     
-    // Lấy slice từ đầu (T1, T2, ... T_endIndex)
+    // Lấy slice cuối cùng (Mới nhất)
     const transactionsToDisplay = transactions.slice(startIndex, endIndex);
 
     transactionsToDisplay.forEach((transaction, index) => {
-        // index ở đây là index trong mảng transactionsToDisplay
-        // transactions.indexOf(transaction) là index trong mảng transactions gốc
+        // Tham số thứ 2 là index trong MẢNG GỐC (transactions)
         appendTransactionToTable(transaction, transactions.indexOf(transaction)); 
     });
 
-    // Cập nhật nút "Xem thêm": Chỉ hiển thị nếu còn giao dịch CHƯA được hiển thị
-    if (endIndex < totalTransactions) {
+    // Cập nhật nút "Xem thêm": Chỉ hiển thị nếu còn giao dịch CŨ HƠN CHƯA được hiển thị (startIndex > 0)
+    if (startIndex > 0) {
+        loadMoreBtn.textContent = `Xem thêm ${startIndex} ngày giao dịch cũ hơn`;
         loadMoreBtn.style.display = 'block';
     } else {
         loadMoreBtn.style.display = 'none';
-    }
-    
-    // Tự động cuộn xuống cuối bảng (giao dịch mới nhất) sau khi tải thêm
-    if (currentPage > 1) {
-         const tableContainer = document.getElementById('transactionList');
-         if(tableContainer) {
-             tableContainer.scrollTop = tableContainer.scrollHeight;
-         }
     }
 }
 
@@ -93,54 +88,14 @@ function loadMoreTransactions() {
     displayTransactions();
 }
 
-// --- LOGIC TÍNH TOÁN CƠ BẢN ---
-
-// Hàm tính toán PNL và % từ Vốn và Số dư (Giữ nguyên)
-function calculateProfitLossFromValues(initialCapital, finalBalance) {
-    initialCapital = parseFloat(initialCapital) || 0;
-    finalBalance = parseFloat(finalBalance) || 0;
-
-    const profitLoss = finalBalance - initialCapital;
-    const profitPercentage = (initialCapital !== 0) ? (profitLoss / initialCapital) * 100 : 0;
-    return {
-        profitLoss: profitLoss.toFixed(2), 
-        profitPercentage: profitPercentage.toFixed(2)
-    };
-}
-
-// Tự động tính toán khi nhập Số dư cuối (Giữ nguyên)
-function calculateProfitLoss() {
-    const initialCapitalInput = document.getElementById('initialCapital');
-    const finalBalanceInput = document.getElementById('finalBalance');
-    let initialCapital = parseFloat(initialCapitalInput.value);
-    const finalBalance = parseFloat(finalBalanceInput.value);
-
-    // Lấy số dư cuối của giao dịch MỚI NHẤT (phần tử cuối của mảng tăng dần)
-    if (transactions.length > 0 && !initialCapitalInput.value && finalBalanceInput === document.activeElement) {
-        const lastTransaction = transactions[transactions.length - 1]; 
-        initialCapitalInput.value = lastTransaction.finalBalance.toFixed(2);
-        initialCapital = parseFloat(initialCapitalInput.value);
-    }
-    
-    if (!isNaN(initialCapital) && !isNaN(finalBalance)) {
-        return calculateProfitLossFromValues(initialCapital, finalBalance);
-    } 
-    return null;
-}
-
-// Tạo ID duy nhất (Giữ nguyên)
-function createUniqueId() {
-    if (window.crypto && window.crypto.randomUUID) {
-        return window.crypto.randomUUID();
-    }
-    return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-}
+// --- LOGIC THÊM/SỬA/XÓA (Đã điều chỉnh logic currentPage) ---
 
 function addTransaction() {
     const date = document.getElementById('date').value;
     const initialCapitalInput = document.getElementById('initialCapital');
     const finalBalance = parseFloat(document.getElementById('finalBalance').value);
     
+    // ... (logic lấy initialCapital giữ nguyên) ...
     if (!initialCapitalInput.value && transactions.length > 0) {
         initialCapitalInput.value = transactions[transactions.length - 1].finalBalance.toFixed(2);
     }
@@ -160,34 +115,16 @@ function addTransaction() {
         
         transactions.push(newTransaction);
         
-        // Sắp xếp lại mảng (TĂNG DẦN)
         transactions.sort((a, b) => new Date(a.date) - new Date(b.date)); 
         localStorage.setItem('transactions', JSON.stringify(transactions));
         
         clearForm();
-        // Cố tình đặt currentPage ở mức tối đa để giao dịch mới nhất hiển thị ngay
+        // QUAN TRỌNG: Đặt currentPage ở mức tối đa để giao dịch mới nhất hiển thị ngay
         currentPage = Math.ceil(transactions.length / TRANSACTIONS_PER_PAGE); 
         loadAllTransactions(); 
         showStatusMessage('Thêm giao dịch thành công!', 'success');
     } else {
         showStatusMessage('Vui lòng nhập đầy đủ thông tin hợp lệ (Ngày, Vốn ban đầu >= 0, Số dư cuối).', 'error');
-    }
-}
-
-function confirmDeleteTransaction(id) {
-    if (confirm("Bạn có chắc chắn muốn xoá giao dịch này?")) {
-        deleteTransaction(id);
-    }
-}
-
-function deleteTransaction(id) {
-    const initialLength = transactions.length;
-    transactions = transactions.filter(t => t.id !== id);
-    
-    if (transactions.length < initialLength) {
-        localStorage.setItem('transactions', JSON.stringify(transactions));
-        loadAllTransactions();
-        showStatusMessage('Đã xoá giao dịch.', 'success');
     }
 }
 
@@ -220,17 +157,72 @@ function updateTransactionData(id, field, value) {
     transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
     localStorage.setItem('transactions', JSON.stringify(transactions));
     
+    // Giữ nguyên currentPage để người dùng không bị nhảy trang khi sửa
     loadAllTransactions(); 
     showStatusMessage('Cập nhật giao dịch thành công.', 'success');
 }
 
-function clearForm() {
+// ... (Các hàm còn lại: calculateProfitLossFromValues, calculateProfitLoss, createUniqueId, confirmDeleteTransaction, deleteTransaction, clearForm, resetData, showStatusMessage, appendTransactionToTable, calculateAdvancedStats, updateSummary, drawChart, exportToExcelByMonth, importFromExcel giữ nguyên) ...
+
+// Khác biệt ở đây là Logic Phân trang trong displayTransactions và addTransaction
+
+function calculateProfitLossFromValues(initialCapital, finalBalance) { /* Giữ nguyên */
+    initialCapital = parseFloat(initialCapital) || 0;
+    finalBalance = parseFloat(finalBalance) || 0;
+    const profitLoss = finalBalance - initialCapital;
+    const profitPercentage = (initialCapital !== 0) ? (profitLoss / initialCapital) * 100 : 0;
+    return {
+        profitLoss: profitLoss.toFixed(2), 
+        profitPercentage: profitPercentage.toFixed(2)
+    };
+}
+
+function calculateProfitLoss() { /* Giữ nguyên */
+    const initialCapitalInput = document.getElementById('initialCapital');
+    const finalBalanceInput = document.getElementById('finalBalance');
+    let initialCapital = parseFloat(initialCapitalInput.value);
+    const finalBalance = parseFloat(finalBalanceInput.value);
+    if (transactions.length > 0 && !initialCapitalInput.value && finalBalanceInput === document.activeElement) {
+        const lastTransaction = transactions[transactions.length - 1]; 
+        initialCapitalInput.value = lastTransaction.finalBalance.toFixed(2);
+        initialCapital = parseFloat(initialCapitalInput.value);
+    }
+    if (!isNaN(initialCapital) && !isNaN(finalBalance)) {
+        return calculateProfitLossFromValues(initialCapital, finalBalance);
+    } 
+    return null;
+}
+
+function createUniqueId() { /* Giữ nguyên */
+    if (window.crypto && window.crypto.randomUUID) {
+        return window.crypto.randomUUID();
+    }
+    return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+}
+
+function confirmDeleteTransaction(id) { /* Giữ nguyên */
+    if (confirm("Bạn có chắc chắn muốn xoá giao dịch này?")) {
+        deleteTransaction(id);
+    }
+}
+
+function deleteTransaction(id) { /* Giữ nguyên */
+    const initialLength = transactions.length;
+    transactions = transactions.filter(t => t.id !== id);
+    if (transactions.length < initialLength) {
+        localStorage.setItem('transactions', JSON.stringify(transactions));
+        loadAllTransactions();
+        showStatusMessage('Đã xoá giao dịch.', 'success');
+    }
+}
+
+function clearForm() { /* Giữ nguyên */
     document.getElementById('date').value = moment().format('YYYY-MM-DD'); 
     document.getElementById('initialCapital').value = '';
     document.getElementById('finalBalance').value = '';
 }
 
-function resetData() {
+function resetData() { /* Giữ nguyên */
     if (confirm("Bạn có muốn xoá toàn bộ dữ liệu? Hành động này không thể hoàn tác!")) {
         localStorage.removeItem('transactions');
         loadAllTransactions();
@@ -238,24 +230,22 @@ function resetData() {
     }
 }
 
-function showStatusMessage(message, type) {
+function showStatusMessage(message, type) { /* Giữ nguyên */
     statusMessage.textContent = message;
     statusMessage.className = type; 
     statusMessage.classList.add('visible');
-    
     setTimeout(() => {
         statusMessage.classList.remove('visible');
     }, 3500);
 }
 
-function appendTransactionToTable(transaction, originalIndexInSortedArray) {
+function appendTransactionToTable(transaction, originalIndexInSortedArray) { /* Giữ nguyên */
     const row = document.createElement('tr');
     row.setAttribute('data-id', transaction.id);
 
     const profitClass = transaction.profitLoss >= 0 ? 'positive' : 'negative';
     let capitalChangeClass = '';
     
-    // Dùng originalIndexInSortedArray là index trong mảng transactions đã sắp xếp tăng dần
     if (originalIndexInSortedArray > 0) { 
         const previousTransaction = transactions[originalIndexInSortedArray - 1];
         const previousBalance = previousTransaction ? previousTransaction.finalBalance : 0;
@@ -287,9 +277,7 @@ function appendTransactionToTable(transaction, originalIndexInSortedArray) {
     transactionTableBody.appendChild(row);
 }
 
-// --- LOGIC TÓM TẮT VÀ THỐNG KÊ CHUYÊN NGHIỆP ---
-
-function calculateAdvancedStats() {
+function calculateAdvancedStats() { /* Giữ nguyên */
     if (transactions.length === 0) {
         return { totalDays: 0, finalBalance: 0, totalProfitLoss: 0, totalDeposits: 0, totalWithdrawals: 0, winCount: 0, lossCount: 0, avgProfitLoss: 0 };
     }
@@ -334,7 +322,6 @@ function calculateAdvancedStats() {
     const totalTradingDays = winCount + lossCount;
     const avgProfitLoss = totalTradingDays > 0 ? totalProfitLoss / totalTradingDays : 0;
     
-    // Lấy số dư cuối của giao dịch MỚI NHẤT (phần tử cuối của mảng tăng dần)
     const finalBalance = transactions[transactions.length - 1].finalBalance; 
 
     return {
@@ -351,7 +338,7 @@ function calculateAdvancedStats() {
 }
 
 
-function updateSummary() {
+function updateSummary() { /* Giữ nguyên */
     const stats = calculateAdvancedStats();
     
     const finalProfitLoss = stats.finalBalance - stats.totalDeposits + stats.totalWithdrawals;
@@ -376,9 +363,7 @@ function updateSummary() {
     }
 }
 
-// --- LOGIC BIỂU ĐỒ (Chart.js) ---
-
-function drawChart() {
+function drawChart() { /* Giữ nguyên */
     if (pnlChartInstance) {
         pnlChartInstance.destroy(); 
     }
@@ -447,9 +432,7 @@ function drawChart() {
     });
 }
 
-// --- LOGIC EXPORT/IMPORT EXCEL (Giữ logic cốt lõi) ---
-
-function exportToExcelByMonth() {
+function exportToExcelByMonth() { /* Giữ nguyên */
     const selectedMonth = document.getElementById("exportMonth").value;
     const selectedYear = document.getElementById("exportYear").value;
     
@@ -517,7 +500,7 @@ function exportToExcelByMonth() {
      showStatusMessage('Đã xuất dữ liệu ra file Excel thành công!', 'success');
 }
 
-function importFromExcel() {
+function importFromExcel() { /* Giữ nguyên */
     const fileInput = document.getElementById('importFile');
     const file = fileInput.files[0];
 
